@@ -1,3 +1,17 @@
+# How to run
+
+## Build the binary
+```bash
+go build -o go-payout-service ./cmd/api
+```
+
+## Run the binary
+```bash
+./go-payout-service
+```
+
+
+# Project Structure
 ```
 svc-payout/
 ├── internal/

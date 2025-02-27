@@ -8,6 +8,8 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+
+	"github.com/keyinvoker/go-payout-service/internal/domain/models"
 )
 
 func Connect() (*gorm.DB, error) {
@@ -17,14 +19,22 @@ func Connect() (*gorm.DB, error) {
 	dbPort := os.Getenv("POSTGRES_DB_PORT")
 	dbName := os.Getenv("POSTGRES_DB_NAME")
 
+	fmt.Println("POSTGRES_DB_USER:", dbUser)
+	fmt.Println("POSTGRES_DB_PASSWORD:", dbPassword)
+	fmt.Println("POSTGRES_DB_HOST:", dbHost)
+	fmt.Println("POSTGRES_DB_PORT:", dbPort)
+	fmt.Println("POSTGRES_DB_NAME:", dbName)
+
 	dsn := fmt.Sprintf(
 		"user=%s password=%s host=%s port=%s dbname=%s sslmode=disable TimeZone=UTC",
+		dbUser,
+		dbPassword,
 		dbHost,
 		dbPort,
-		dbUser,
 		dbName,
-		dbPassword,
 	)
+
+	fmt.Println("DSN:", dsn)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -45,6 +55,13 @@ func Connect() (*gorm.DB, error) {
 	}
 
 	log.Println("Successfully connected to Postgres database")
+
+	err = db.AutoMigrate(&models.Payout{})
+	if err != nil {
+		log.Fatal("Failed to migrate database:", err)
+	}
+
+	log.Println("Database migrated successfully!")
 
 	return db, nil
 }
