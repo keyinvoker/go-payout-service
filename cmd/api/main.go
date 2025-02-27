@@ -8,10 +8,8 @@ import (
 	"github.com/keyinvoker/go-payout-service/internal/domain/repositories"
 
 	v1 "github.com/keyinvoker/go-payout-service/internal/infrastructure/api/handlers/v1"
-	v2 "github.com/keyinvoker/go-payout-service/internal/infrastructure/api/handlers/v2"
 	"github.com/keyinvoker/go-payout-service/internal/infrastructure/persistence/database/postgres"
 
-	"github.com/gin-gonic/gin"
 	"github.com/gorilla/mux"
 )
 
@@ -23,22 +21,13 @@ func main() {
 
 	payoutRepo := repositories.NewPayoutRepository(db)
 	payoutService := services.NewPayoutService(payoutRepo)
-	payoutHandler := v1.NewPayoutHandler(payoutService)
 
-	router := gin.Default()
+	router := mux.NewRouter()
+	apiV2 := router.PathPrefix("/api/v1").Subrouter()
 
-	apiV1 := router.Group("/api/v1")
-	{
-		apiV1.GET("/payouts/:id", payoutHandler.GetPayoutByID)
-		// apiV1.POST("/payouts", payoutHandler.CreatePayout)
-	}
+	payoutHandlerV1 := v1.NewPayoutHandler(payoutService)
 
-	muxRouter := mux.NewRouter()
-	apiV2 := muxRouter.PathPrefix("/api/v2").Subrouter()
-
-	payoutHandlerV2 := v2.NewPayoutHandler(payoutService)
-
-	apiV2.HandleFunc("/payouts/:id", payoutHandlerV2.GetPayoutByID).Methods("GET")
+	apiV2.HandleFunc("/payouts/:id", payoutHandlerV1.GetPayoutByID).Methods("GET")
 
 	port := "8888"
 	log.Println("Server running on port", port)

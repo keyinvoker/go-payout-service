@@ -1,10 +1,11 @@
 package v1
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
+	"github.com/gorilla/mux"
 	"github.com/keyinvoker/go-payout-service/internal/application/services"
 )
 
@@ -16,18 +17,20 @@ func NewPayoutHandler(payoutService *services.PayoutService) *PayoutHandler {
 	return &PayoutHandler{payoutService: payoutService}
 }
 
-func (handler *PayoutHandler) GetPayoutByID(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
+func (h *PayoutHandler) GetPayoutByID(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid payout ID"})
+		http.Error(w, "Invalid payout ID", http.StatusBadRequest)
 		return
 	}
 
-	payout, err := handler.payoutService.GetByID(ctx.Request.Context(), id)
+	payout, err := h.payoutService.GetByID(r.Context(), id)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Payout not found"})
+		http.Error(w, "Payout not found", http.StatusNotFound)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"payout": payout})
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(payout)
 }
