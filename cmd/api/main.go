@@ -8,10 +8,11 @@ import (
 	"github.com/keyinvoker/go-payout-service/internal/domain/repositories"
 
 	v1 "github.com/keyinvoker/go-payout-service/internal/infrastructure/api/handlers/v1"
+	v2 "github.com/keyinvoker/go-payout-service/internal/infrastructure/api/handlers/v2"
 	"github.com/keyinvoker/go-payout-service/internal/infrastructure/persistence/database/postgres"
 
-	"github.com/gin-gonic/gin" // Or your preferred web framework
-	// ... other imports for handlers, etc.
+	"github.com/gin-gonic/gin"
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -26,11 +27,18 @@ func main() {
 
 	router := gin.Default()
 
-	api := router.Group("/api")
+	apiV1 := router.Group("/api/v1")
 	{
-		api.GET("/payouts/:id", payoutHandler.GetPayoutByID)
-		// api.POST("/payouts", payoutHandler.CreatePayout)
+		apiV1.GET("/payouts/:id", payoutHandler.GetPayoutByID)
+		// apiV1.POST("/payouts", payoutHandler.CreatePayout)
 	}
+
+	muxRouter := mux.NewRouter()
+	apiV2 := muxRouter.PathPrefix("/api/v2").Subrouter()
+
+	payoutHandlerV2 := v2.NewPayoutHandler(payoutService)
+
+	apiV2.HandleFunc("/payouts/:id", payoutHandlerV2.GetPayoutByID).Methods("GET")
 
 	port := "8888"
 	log.Println("Server running on port", port)
