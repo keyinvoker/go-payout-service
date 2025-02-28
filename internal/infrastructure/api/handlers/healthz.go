@@ -15,10 +15,10 @@ func NewHealthHandler(db *gorm.DB) *HealthHandler {
 	return &HealthHandler{db: db}
 }
 
-func (h *HealthHandler) CheckHealth(c *gin.Context) {
+func (h *HealthHandler) CheckHealth(ctx *gin.Context) {
 	sqlDB, err := h.db.DB()
 	if err != nil {
-		c.JSON(
+		ctx.JSON(
 			http.StatusInternalServerError,
 			gin.H{"error": "Failed to get database connection"},
 		)
@@ -27,14 +27,14 @@ func (h *HealthHandler) CheckHealth(c *gin.Context) {
 
 	err = sqlDB.Ping()
 	if err != nil {
-		c.JSON(
+		ctx.JSON(
 			http.StatusInternalServerError,
 			gin.H{"error": "Failed to ping database"},
 		)
 		return
 	}
 
-	c.JSON(
+	ctx.JSON(
 		http.StatusOK,
 		gin.H{"status": "OK", "message": "Database connection is healthy!"},
 	)

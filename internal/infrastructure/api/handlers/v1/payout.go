@@ -16,18 +16,18 @@ func NewPayoutHandler(payoutService *services.PayoutService) *PayoutHandler {
 	return &PayoutHandler{payoutService: payoutService}
 }
 
-func (h *PayoutHandler) GetPayoutByID(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
+func (h *PayoutHandler) GetPayoutByID(ctx *gin.Context) {
+	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid payout ID"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid payout ID"})
 		return
 	}
 
-	payout, err := h.payoutService.GetByID(c.Request.Context(), id)
+	payout, err := h.payoutService.GetByID(ctx.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Payout not found"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Payout not found"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"payout": payout})
+	ctx.JSON(http.StatusOK, gin.H{"payout": payout})
 }
