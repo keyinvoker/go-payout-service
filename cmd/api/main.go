@@ -1,25 +1,34 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/keyinvoker/go-payout-service/internal/application/services"
 	"github.com/keyinvoker/go-payout-service/internal/domain/repositories"
 
+	"github.com/keyinvoker/go-payout-service/internal/config"
+	"github.com/keyinvoker/go-payout-service/internal/infrastructure/api/handlers"
 	v1 "github.com/keyinvoker/go-payout-service/internal/infrastructure/api/handlers/v1"
-	v2 "github.com/keyinvoker/go-payout-service/internal/infrastructure/api/handlers/v2"
 	"github.com/keyinvoker/go-payout-service/internal/infrastructure/persistence/database/postgres"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/mux"
 )
 
 func main() {
-	db, err := postgres.Connect()
+	cfg := config.LoadConfig()
+
+	db, err := postgres.NewPostgresConnection()
 	if err != nil {
 		log.Fatal("Failed to connect to the database:", err)
 	}
+
+	healthzHandler := handlers.NewHealthHandler(db)
 
 	payoutRepo := repositories.NewPayoutRepository(db)
 	payoutService := services.NewPayoutService(payoutRepo)
@@ -27,23 +36,45 @@ func main() {
 
 	router := gin.Default()
 
-	apiV1 := router.Group("/api/v1")
+	api := router.Group("/api")
 	{
-		apiV1.GET("/payouts/:id", payoutHandler.GetPayoutByID)
-		// apiV1.POST("/payouts", payoutHandler.CreatePayout)
+		api.GET("/healthz", healthzHandler.CheckHealth)
+
+		apiV1 := api.Group("/api/v1")
+		{
+			apiV1.GET("/payouts/:id", payoutHandler.GetPayoutByID)
+			// apiV1.POST("/payouts", payoutHandler.CreatePayout)
+		}
 	}
 
-	muxRouter := mux.NewRouter()
-	apiV2 := muxRouter.PathPrefix("/api/v2").Subrouter()
-
-	payoutHandlerV2 := v2.NewPayoutHandler(payoutService)
-
-	apiV2.HandleFunc("/payouts/:id", payoutHandlerV2.GetPayoutByID).Methods("GET")
-
-	port := "8888"
-	log.Println("Server running on port", port)
-	if err := http.ListenAndServe(":"+port, router); err != nil {
-		log.Fatal("Server failed:", err)
+	port := cfg.ServerPort
+	srv := &http.Server{
+		Addr:    ":" + port,
+		Handler: router,
 	}
+
+	// Start server in a goroutine
+	go func() {
+		log.Println("Server running on port", port)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Server failed: %v", err)
+		}
+	}()
+
+	// Listening for interrupt signal
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutting down server...")
+
+	// Give outstanding requests 5 seconds to complete
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal("Server forced to shutdown:", err)
+	}
+
+	log.Println("Server exited properly")
 
 }
