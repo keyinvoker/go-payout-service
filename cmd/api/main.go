@@ -11,13 +11,12 @@ import (
 
 	"github.com/keyinvoker/go-payout-service/internal/application/services"
 	"github.com/keyinvoker/go-payout-service/internal/domain/repositories"
+	"github.com/keyinvoker/go-payout-service/internal/infrastructure/api/router"
 
 	"github.com/keyinvoker/go-payout-service/internal/config"
 	"github.com/keyinvoker/go-payout-service/internal/infrastructure/api/handlers"
 	v1 "github.com/keyinvoker/go-payout-service/internal/infrastructure/api/handlers/v1"
 	"github.com/keyinvoker/go-payout-service/internal/infrastructure/persistence/database/postgres"
-
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -28,30 +27,24 @@ func main() {
 		log.Fatal("Failed to connect to the database:", err)
 	}
 
+	// Initialize handlers and services
 	healthzHandler := handlers.NewHealthHandler(db)
 
 	payoutRepo := repositories.NewPayoutRepository(db)
 	payoutService := services.NewPayoutService(payoutRepo)
 	payoutHandler := v1.NewPayoutHandler(payoutService)
 
-	router := gin.Default()
+	router := router.NewRouter(
+		healthzHandler,
+		payoutHandler,
+	)
 
-	api := router.Group("/api")
-	{
-		api.GET("/healthz", healthzHandler.CheckHealth)
-
-		apiV1 := api.Group("/v1")
-		{
-			apiV1.GET("/payout/:id", payoutHandler.GetPayoutByID)
-			apiV1.POST("/payout", payoutHandler.CreatePayout)
-			apiV1.PUT("/payout", payoutHandler.UpdatePayoutDescription)
-		}
-	}
+	handler := router.SetupRoutes()
 
 	port := cfg.ServerPort
 	srv := &http.Server{
 		Addr:    ":" + port,
-		Handler: router,
+		Handler: handler,
 	}
 
 	// Start server in a goroutine
@@ -77,5 +70,4 @@ func main() {
 	}
 
 	log.Println("Server exited properly")
-
 }
