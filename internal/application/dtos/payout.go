@@ -8,3 +8,8 @@ type CreatePayoutRequest struct {
 	Fine        float64 `json:"fine" default:"0"`
 	Description string  `json:"description"`
 }
+
+type UpdatePayoutDescriptionRequest struct {
+	ID          int    `json:"id" binding:"required"`
+	Description string `json:"description" binding:"required"`
+}

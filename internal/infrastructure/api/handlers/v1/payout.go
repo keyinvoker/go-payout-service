@@ -69,3 +69,30 @@ func (h *PayoutHandler) CreatePayout(ctx *gin.Context) {
 		},
 	)
 }
+
+func (h *PayoutHandler) UpdatePayoutDescription(ctx *gin.Context) {
+	usecase := usecases.NewUpdatePayoutDescriptionUsecase(h.payoutService)
+
+	var requestBody dtos.UpdatePayoutDescriptionRequest
+
+	if err := ctx.ShouldBindJSON(&requestBody); err != nil {
+		ctx.JSON(
+			http.StatusBadRequest,
+			gin.H{"error": err.Error()},
+		)
+		return
+	}
+
+	payout, err := usecase.Execute(ctx, &requestBody)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+
+	ctx.JSON(
+		http.StatusOK,
+		gin.H{
+			"message": "Payout description updated successfully",
+			"payout":  &payout,
+		},
+	)
+}

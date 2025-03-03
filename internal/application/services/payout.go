@@ -31,3 +31,24 @@ func (service *PayoutService) Create(
 
 	return payout, nil
 }
+
+func (service *PayoutService) UpdateDescription(
+	ctx context.Context,
+	id int,
+	description string,
+) (*models.Payout, error) {
+
+	payout, err := service.payoutRepo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	payout.Description = &description
+
+	err = service.payoutRepo.Update(ctx, payout)
+	if err != nil {
+		return nil, err
+	}
+
+	return payout, nil
+}

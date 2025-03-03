@@ -44,6 +44,7 @@ func main() {
 		{
 			apiV1.GET("/payouts/:id", payoutHandler.GetPayoutByID)
 			apiV1.POST("/payout", payoutHandler.CreatePayout)
+			apiV1.PUT("/payout", payoutHandler.UpdatePayoutDescription)
 		}
 	}
 
