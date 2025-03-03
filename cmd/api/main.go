@@ -42,7 +42,7 @@ func main() {
 
 		apiV1 := api.Group("/v1")
 		{
-			apiV1.GET("/payouts/:id", payoutHandler.GetPayoutByID)
+			apiV1.GET("/payout/:id", payoutHandler.GetPayoutByID)
 			apiV1.POST("/payout", payoutHandler.CreatePayout)
 			apiV1.PUT("/payout", payoutHandler.UpdatePayoutDescription)
 		}
