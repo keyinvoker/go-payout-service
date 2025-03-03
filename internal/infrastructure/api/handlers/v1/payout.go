@@ -86,6 +86,7 @@ func (h *PayoutHandler) UpdatePayoutDescription(ctx *gin.Context) {
 	payout, err := usecase.Execute(ctx, &requestBody)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	ctx.JSON(
