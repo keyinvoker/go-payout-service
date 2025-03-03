@@ -21,7 +21,11 @@ func (u *UpdatePayoutDescriptionUsecase) Execute(
 	data *dtos.UpdatePayoutDescriptionRequest,
 ) (*models.Payout, error) {
 
-	payout, err := u.payoutService.UpdateDescription(ctx, data.ID, data.Description)
+	payout, err := u.payoutService.UpdateDescription(
+		ctx,
+		data.ID,
+		data.Description,
+	)
 	if err != nil {
 		return nil, err
 	}

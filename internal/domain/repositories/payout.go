@@ -33,7 +33,12 @@ func NewPayoutRepository(db *gorm.DB) *PayoutRepository {
 func (r *PayoutRepository) Create(ctx context.Context, entity *models.Payout) error {
 	result := r.db.WithContext(ctx).Create(entity)
 	if result.Error != nil {
-		return fmt.Errorf("failed to create payout: %w", exceptions.ErrDatabase{Op: "create", Err: result.Error, Resource: "payout"})
+		return fmt.Errorf(
+			"failed to create payout: %w",
+			exceptions.ErrDatabase{
+				Op: "create", Err: result.Error, Resource: "payout",
+			},
+		)
 	}
 	return nil
 }
@@ -41,43 +46,83 @@ func (r *PayoutRepository) Create(ctx context.Context, entity *models.Payout) er
 func (r *PayoutRepository) Update(ctx context.Context, entity *models.Payout) error {
 	result := r.db.WithContext(ctx).Save(entity)
 	if result.Error != nil {
-		return fmt.Errorf("failed to update payout: %w", exceptions.ErrDatabase{Op: "update", Err: result.Error, Resource: "payout"})
+		return fmt.Errorf(
+			"failed to update payout: %w",
+			exceptions.ErrDatabase{
+				Op: "update", Err: result.Error, Resource: "payout",
+			},
+		)
 	}
 	return nil
 }
 
 func (r *PayoutRepository) Delete(ctx context.Context, id int) error {
 	var payout models.Payout
+
 	result := r.db.WithContext(ctx).First(&payout, id)
 	if result.Error != nil {
-		return fmt.Errorf("failed to find payout for deletion: %w", exceptions.ErrDatabase{Op: "delete", Err: result.Error, Resource: "payout"})
+		return fmt.Errorf(
+			"failed to find payout for deletion: %w",
+			exceptions.ErrDatabase{
+				Op:       "delete",
+				Err:      result.Error,
+				Resource: "payout",
+			},
+		)
 	}
 
 	result = r.db.WithContext(ctx).Delete(&payout)
 	if result.Error != nil {
-		return fmt.Errorf("failed to delete payout: %w", exceptions.ErrDatabase{Op: "delete", Err: result.Error, Resource: "payout"})
+		return fmt.Errorf(
+			"failed to delete payout: %w",
+			exceptions.ErrDatabase{
+				Op:       "delete",
+				Err:      result.Error,
+				Resource: "payout",
+			},
+		)
 	}
+
 	return nil
 }
 
 func (r *PayoutRepository) Count(ctx context.Context) (int64, error) {
 	var count int64
+
 	result := r.db.WithContext(ctx).Model(&models.Payout{}).Count(&count)
+
 	if result.Error != nil {
-		return 0, fmt.Errorf("failed to count payouts: %w", exceptions.ErrDatabase{Op: "count", Err: result.Error, Resource: "payout"})
+		return 0, fmt.Errorf(
+			"failed to count payouts: %w",
+			exceptions.ErrDatabase{
+				Op:       "count",
+				Err:      result.Error,
+				Resource: "payout",
+			},
+		)
 	}
+
 	return count, nil
 }
 
 func (r *PayoutRepository) GetByID(ctx context.Context, id int) (*models.Payout, error) {
 	var payout models.Payout
+
 	result := r.db.WithContext(ctx).First(&payout, "id = ?", id)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return nil, exceptions.ErrNotFound{Resource: "payout", ID: id}
+			return nil, exceptions.ErrNotFound{
+				Resource: "payout",
+				ID:       id,
+			}
 		}
-		return nil, exceptions.ErrDatabase{Op: "get", Err: result.Error, Resource: "payout"}
+
+		return nil, exceptions.ErrDatabase{
+			Op:       "get",
+			Err:      result.Error,
+			Resource: "payout",
+		}
 	}
 
 	return &payout, nil
