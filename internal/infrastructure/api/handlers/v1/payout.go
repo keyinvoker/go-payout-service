@@ -5,7 +5,9 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/keyinvoker/go-payout-service/internal/application/dtos"
 	"github.com/keyinvoker/go-payout-service/internal/application/services"
+	"github.com/keyinvoker/go-payout-service/internal/application/usecases"
 )
 
 type PayoutHandler struct {
@@ -23,11 +25,47 @@ func (h *PayoutHandler) GetPayoutByID(ctx *gin.Context) {
 		return
 	}
 
-	payout, err := h.payoutService.GetByID(ctx.Request.Context(), id)
+	usecase := usecases.NewGetPayoutByIDUsecase(h.payoutService)
+
+	payout, err := usecase.Execute(ctx.Request.Context(), id)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Payout not found"})
+		ctx.JSON(
+			http.StatusBadRequest,
+			gin.H{"error": "Payout not found"},
+		)
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"payout": payout})
+}
+
+func (h *PayoutHandler) CreatePayout(ctx *gin.Context) {
+	usecase := usecases.NewCreatePayoutUsecase(h.payoutService)
+
+	var requestBody dtos.CreatePayoutRequest
+
+	if err := ctx.ShouldBindJSON(&requestBody); err != nil {
+		ctx.JSON(
+			http.StatusBadRequest,
+			gin.H{"error": err.Error()},
+		)
+		return
+	}
+
+	payout, err := usecase.Execute(ctx, &requestBody)
+	if err != nil {
+		ctx.JSON(
+			http.StatusBadRequest,
+			gin.H{"error": err.Error()},
+		)
+		return
+	}
+
+	ctx.JSON(
+		http.StatusCreated,
+		gin.H{
+			"message": "Payout created successfully",
+			"payout":  &payout,
+		},
+	)
 }

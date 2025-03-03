@@ -40,10 +40,10 @@ func main() {
 	{
 		api.GET("/healthz", healthzHandler.CheckHealth)
 
-		apiV1 := api.Group("/api/v1")
+		apiV1 := api.Group("/v1")
 		{
 			apiV1.GET("/payouts/:id", payoutHandler.GetPayoutByID)
-			// apiV1.POST("/payouts", payoutHandler.CreatePayout)
+			apiV1.POST("/payout", payoutHandler.CreatePayout)
 		}
 	}
 
