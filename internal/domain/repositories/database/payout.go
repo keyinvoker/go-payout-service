@@ -18,7 +18,7 @@ type IPayoutRepository interface {
 	Delete(ctx context.Context, id int) error
 	Count(ctx context.Context) (int64, error)
 	GetByID(ctx context.Context, id int) (*models.Payout, error)
-	GetAll(ctx context.Context, filters map[string]interface{}) ([]*models.Payout, error)
+	GetAll(ctx context.Context, filters map[string]any) ([]*models.Payout, error)
 	GetPayoutsByStatus(ctx context.Context, status constants.PayoutStatus) ([]*models.Payout, error)
 }
 
@@ -128,7 +128,7 @@ func (r *PayoutRepository) GetByID(ctx context.Context, id int) (*models.Payout,
 	return &payout, nil
 }
 
-func (r *PayoutRepository) GetAll(ctx context.Context, filters map[string]interface{}) ([]*models.Payout, error) {
+func (r *PayoutRepository) GetAll(ctx context.Context, filters map[string]any) ([]*models.Payout, error) {
 	var payouts []*models.Payout
 	query := r.db.WithContext(ctx).Model(&models.Payout{})
 
