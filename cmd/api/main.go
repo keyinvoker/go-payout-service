@@ -9,8 +9,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/keyinvoker/go-payout-service/internal/application/services"
 	"github.com/keyinvoker/go-payout-service/internal/domain/repositories"
+	"github.com/keyinvoker/go-payout-service/internal/domain/services"
 	"github.com/keyinvoker/go-payout-service/internal/infrastructure/api/router"
 
 	"github.com/keyinvoker/go-payout-service/internal/config"

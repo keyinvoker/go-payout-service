@@ -6,8 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/keyinvoker/go-payout-service/internal/application/dtos"
-	"github.com/keyinvoker/go-payout-service/internal/application/services"
 	"github.com/keyinvoker/go-payout-service/internal/application/usecases"
+	"github.com/keyinvoker/go-payout-service/internal/domain/services"
 )
 
 type PayoutHandler struct {

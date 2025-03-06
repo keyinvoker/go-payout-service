@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/keyinvoker/go-payout-service/internal/application/dtos"
-	"github.com/keyinvoker/go-payout-service/internal/application/services"
 	"github.com/keyinvoker/go-payout-service/internal/domain/models"
+	"github.com/keyinvoker/go-payout-service/internal/domain/services"
 )
 
 type UpdatePayoutDescriptionUsecase struct {
