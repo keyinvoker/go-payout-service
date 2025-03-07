@@ -1,3 +1,26 @@
+# Description
+
+- Architecture: Domain-Driven Design (DDD)
+- Migration: golang-migrate
+
+# Migration
+
+## Create a new migration version
+```bash
+migrate create -ext sql -dir migrations -seq {description}
+```
+
+## Up a version
+```bash
+migrate -database "postgres://user:password@localhost:5432/dbname?sslmode=disable" -path migrations up
+```
+
+## Down a version
+
+```bash
+migrate -database "postgres://user:password@localhost:5432/dbname?sslmode=disable" -path migrations down 1
+```
+
 # How to run
 
 ## Build the binary
