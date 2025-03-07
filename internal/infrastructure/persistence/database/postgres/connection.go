@@ -9,7 +9,6 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/keyinvoker/go-payout-service/internal/config"
-	"github.com/keyinvoker/go-payout-service/internal/domain/models"
 )
 
 func NewPostgresConnection() (*gorm.DB, error) {
@@ -47,16 +46,6 @@ func NewPostgresConnection() (*gorm.DB, error) {
 	}
 
 	log.Println("NewPostgresConnection :: Successfully connected to Postgres database")
-
-	if err := (&models.Payout{}).BeforeMigrate(db); err != nil {
-		log.Fatalf("NewPostgresConnection :: Failed to create enum type: %v", err)
-	}
-
-	if err := db.AutoMigrate(&models.Payout{}); err != nil {
-		log.Fatalf("NewPostgresConnection :: Failed to migrate database: %v", err)
-	}
-
-	log.Println("NewPostgresConnection :: Database migrated successfully!")
 
 	return db, nil
 }
